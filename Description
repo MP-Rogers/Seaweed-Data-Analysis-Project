@@ -1,0 +1,4 @@
+This Repository contains information on the project. This project covers some analysis into the dataset taken from: https://doi.org/10.3389/fmars.2019.00618. 
+All Credit goes to the Original Authors and collectors of the data.
+
+The dataset contains the (binomial) species of seaweed, a number of chemical parameters, light intensity, and the specific growth rate of the seaweed.
