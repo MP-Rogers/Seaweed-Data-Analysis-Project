@@ -1,4 +1,15 @@
 This Repository contains information on the project. This project covers some analysis into the dataset taken from: https://doi.org/10.3389/fmars.2019.00618. 
 All Credit goes to the Original Authors and collectors of the data.
 
-The dataset contains the (binomial) species of seaweed, a number of chemical parameters, light intensity, and the specific growth rate of the seaweed.
+The dataset contains the (binomial) species of seaweed, the Phylum, a number of chemical parameters, light intensity, and the specific growth rate of the seaweed.
+
+Goals for the project include:
+      + Reviewing what I know so far and learning new stuff
+      + Clean/Tidy The Dataset as necessary.
+      + Perform exploratory data analysis and ansk questions
+      + Are there significant differences in growth rate with phylum or genus?
+      + Which parameters are most important to growth rate
+      + Visualize Results
+      + Report on the above with R Markdown or a similar package
+      + Publish on Github
+      + Look back on what i could do differently, whats left to learn.
