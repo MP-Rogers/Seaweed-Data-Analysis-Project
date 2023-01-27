@@ -1,3 +1,5 @@
+PROJECT IN PROGRESS. ITS INCOMPLETE. REMEMBER TO UPDATE THIS WHEN YOU ARE DONE
+
 This Repository contains information on the project. This project covers some analysis into the dataset taken from: https://doi.org/10.3389/fmars.2019.00618. 
 All Credit goes to the Original Authors and collectors of the data.
 
@@ -13,3 +15,5 @@ Goals for the project include:
       + Report on the above with R Markdown or a similar package
       + Publish on Github
       + Look back on what i could do differently, whats left to learn.
+
+Project in progress. Descripion will say when project is complete
