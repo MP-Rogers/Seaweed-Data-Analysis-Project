@@ -10,7 +10,9 @@ Goals for the project include:
       + Clean/Tidy The Dataset as necessary.
       + Perform exploratory data analysis and ansk questions
       + Are there significant differences in growth rate with phylum or genus?
+      + Which group grows fastest
       + Which parameters are most important to growth rate
+            + Can the above be modelled linearly
       + Visualize Results
       + Report on the above with R Markdown or a similar package
       + Publish on Github
