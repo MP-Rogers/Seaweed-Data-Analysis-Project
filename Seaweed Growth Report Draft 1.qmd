@@ -1,0 +1,162 @@
+---
+title: "Seaweed Growth Report"
+author: "Matthew-P Rogers"
+format: html
+editor: visual
+theme: cerulean
+---
+
+# Seaweed Growth Project
+
+For this project, I found a dataset and practiced some analysis on it. I find its generally helpful to use data that matters, or that you are interested in. As a marine biologist, with an interest in aquaculture, I found this dataset interesting. It is taken from [here](https://doi.pangaea.de/10.1594/PANGAEA.907407) and all credit goes to the original authors. Since i'm also learning R, that is how the analysis will be done. I'm producing this report in Quarto too, so its a learning experience.
+
+## Objectives
+For this dataset/project. There are a couple things I know i want to do before hand.
+
+* Clean the dataset if needed
+* Perform some exploratory data analysis
+  + Address anything else interesting that arises here
+* Determine if any group grows faster than the others
+* Determine which chemical/physical parameters affect growth most
+  + Describe this growth if possible
+* Visualize some of the results above
+  
+{{< pagebreak >}} 
+
+
+## The Coding
+
+### Load the required R packages
+The first step is to load the packages i'll need for the project
+
+```{r Load Package, warning=FALSE}
+library(tidyverse)
+library(plotly)
+library(corrplot)
+library(common)
+library(fmtr)
+
+```
+
+### Import the data
+
+```{r}
+Seaweed.Envi.Data <- read.delim("Dataset without title.tab", header=FALSE)
+dataset<-Seaweed.Envi.Data
+```
+
+### Start Cleaning the Dataset
+This step involves making the dataset easier to work with. I changed the column/field names to make it easier to work with. I also ensures fields are there correct data types. I separated out the species and genus names.
+
+```{r, warning=FALSE}
+  #Make column names easier to work with
+  titles<-dataset[1,]
+  titles[3:8]<-c("NH4.conc","PO4.conc","Biomass.conc","Irradiance","NO3.conc","Specifc.Growth.Rate")
+  colnames(dataset)<-titles
+  dataset<-dataset[-1,]
+  #Ensure everything is the right datatype
+  dataset[,3:8]<-sapply(dataset[,3:8],as.numeric)
+  #Separate species and genus
+  dataset<-dataset |> separate(Species, c("Genus","Species"))
+```
+
+There were also a few changes I saw after exploring the dataset. They happened later in the process, but because its the same "cleaning" to make the dataset easy to work with, I'm leaving it here.
+```{r, warning=FALSE}
+  dataset <- dataset |> mutate (Genus = ifelse(Genus == "U", "Ulva",Genus)) 
+  dataset <- dataset |> mutate (Genus = ifelse(Genus == "Enteromorpa", "Enteropmorpha", Genus))
+  dataset <- dataset |> mutate (Phylum = ifelse(Genus == "Enteropmorpha", "Chlorophyta", Phylum))
+  aq<- !grepl("aquatic",dataset$Genus)
+  dataset<-dataset[aq,]
+```
+
+### Exploration
+The next step is exploratory data analysis. This is looking around the dataset, trying to get a feel of things.
+
+```{r, warning=FALSE,echo=FALSE}
+# firstly, so as not to tamper with the original dataset
+  dataset2<-dataset
+  n<-length(dataset2[,1])
+  print(paste("The Dataset has ", n, " records(after the first cleaning)"))
+```
+
+First i'll look at the fields.
+
+```{r,echo=FALSE}
+glimpse(dataset2)
+```
+At first glance that's a lot of NAs. There's a lot of missing Values. For most, it would mean the data is not collected. That is not the same as a value of 0. I'll likely have to ignore those values/rows/observations when the time comes.
+
+
+And then I'll look at a brief summary of those fields
+```{r,echo=FALSE}
+summary(dataset2)
+```
+
+Now i'll do some brief cor plots and pairise plots.
+```{r, echo=FALSE, warning=FALSE}
+  pairs(dataset2[,4:9])
+  #Heatmap/corrplot Theres a ton of NA's. Id have to do some more selective extractuin
+  working.data<-dataset2[,4:9] |> na.omit()
+  corr<-cor(working.data)
+  c2<-corrplot(corr, method = "square", type = "lower",addCoef.col = "black")
+  #print(c2)
+```
+
+
+So, Seaweeds broadly come in red, green and brown. I'm curious to how much of each there is, and what species I have in the dataset. 
+Firstly lets see how much of each group(or phylum) of seaweed there is.
+```{r, warning=FALSE, echo=FALSE}
+ phylum.comp<-dataset |> select(Phylum) |> group_by(Phylum) |> summarise( Count = n())
+  phylum.comp.plot<- phylum.comp |> plot_ly(labels = ~Phylum,values =~Count ,type = "pie",
+                                            textinfo = 'label+percent', hole = 0.6,
+                                            marker = list(colors = c ("#6BF502", "#F8A205","#FB3D15"))) |>
+    layout(title =" Amount of each Phyllum in dataset")
+  phylum.comp.plot
+```
+
+So theres a ton of red seaweed. Its not surprising. It's not that reds are more common in nature, but they are the most commonly grown commercially. It makes sense that its easier to access and collect data on them.
+
+In fact, lets see the species and genus in the list
+```{r, echo=FALSE}
+  species.list<-unique(dataset$Species)
+  #View(species.list)
+  print(paste("There are ",length(species.list), " species in the dataset"))
+  #print(paste(species.list))
+  # Yeah thats too much to parse.
+  genus.list<-unique(dataset$Genus) #shows some odd ones, lets see what we can do
+  print(paste("There are ",length(genus.list), " genus in the dataset"))
+  print(paste("The Genus in the sample are: "))
+  print(paste(sort(genus.list)))
+```
+
+
+The specific growth rate is what im most interested in as a result.
+
+```{r, warning=FALSE,echo=FALSE}
+  
+  phylum.growth.plot<-plot_ly(y = ~dataset$Specifc.Growth.Rate,type = "box", color = ~dataset$Phylum)
+  phylum.growth.plot
+  # above has big annoying outlier, i'll search for and remove it
+  
+  
+
+```
+This box plot shows a huge outlier that makes the rest unreadable. I'm going to remove it and look again.
+
+```{r, echo=FALSE}
+outlier<-order(dataset$Specifc.Growth.Rate,decreasing = TRUE)
+  outlier.index<-outlier[1]
+  t.data<-dataset[-outlier.index,]
+  phylum.growth.plot<-plot_ly(y = ~t.data$Specifc.Growth.Rate,type = "box", 
+                              color = ~t.data$Phylum,
+                              colors =  c("#6BF502", "#F8A205","#FB3D15")
+                              ) |>
+    layout(title ="Growth Rates of different Phylla of Seaweed in dataset",yaxis = list(title = "Growth rates (% mass change per day)"))
+  phylum.growth.plot
+  
+```
+That's a better look. Theres some negative values. This indicates some seaweed actually lost mass during sampling. This might be due to some herbivores snacking on it, peices breaking off due to damage or even just errors in the process. 
+
+
+
+
